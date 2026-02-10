@@ -51,6 +51,8 @@ services:
             - ../Evaluation-Tool-Course-Service/project:/project:/project/
         ports:
             - 8001:8001
+        extra_hosts:
+            - "api.course.eduscrum.local:host-gateway"
         depends_on:
             - db
             - redis
