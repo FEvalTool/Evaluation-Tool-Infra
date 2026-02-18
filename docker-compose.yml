@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+    redis:
+        image: redis:8.2.3-alpine
+        container_name: redis
+        ports:
+            - 6380:6379
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    db:
+        image: postgres:18.1-alpine
+        container_name: database
+        restart: unless-stopped
+        ports:
+            - 5433:5432
+        env_file:
+            - ./env/.env.db
+        volumes:
+            - ./scripts/db:/docker-entrypoint-initdb.d
+
+    user-backend:
+        image: user_management_service
+        container_name: user_management_service
+        env_file:
+            - ./env/.env.user_service 
+        # Let it sleep, we will set it inside docker container
+        command: sleep infinity
+        volumes:
+            - ../Evaluation-Tool-User-Service/project:/project/
+        ports:
+            - 8000:8000
+        depends_on:
+            - db
+            - redis
+    
+    course-backend:
+        image: course_management_service
+        container_name: course_management_service
+        env_file:
+            - ./env/.env.course_service 
+        # Let it sleep, we will set it inside docker container
+        command: sleep infinity
+        volumes:
+            - ../Evaluation-Tool-Course-Service/project:/project:/project/
+        ports:
+            - 8001:8001
+        depends_on:
+            - db
+            - redis
