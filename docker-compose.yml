@@ -21,6 +21,8 @@ services:
         env_file:
             - ./env/.env.db
         volumes:
+            - pg_data:/var/lib/postgresql/data
+            # Store running script when initialize db container
             - ./scripts/db:/docker-entrypoint-initdb.d
 
     user-backend:
@@ -52,3 +54,6 @@ services:
         depends_on:
             - db
             - redis
+
+volumes:
+    pg_data:
