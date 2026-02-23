@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
     redis:
@@ -24,22 +24,26 @@ services:
             - pg_data:/var/lib/postgresql/data
             # Store running script when initialize db container
             - ./scripts/db:/docker-entrypoint-initdb.d
-    
+
     garage:
         container_name: s3_storage
-        image: dxflrs/garage:v2.2.0
+        build:
+            context: .
+            dockerfile: docker/garage/Dockerfile
         ports:
             - 3900:3900
         volumes:
             - ./env/garage.toml:/etc/garage.toml
             - garage-meta:/var/lib/garage/meta:rw
             - garage-data:/var/lib/garage/data:rw
+            - ./env:/env # Mount env directory to save .env.garage.credential
 
     user-backend:
         image: user_management_service
         container_name: user_management_service
         env_file:
-            - ./env/.env.user_service 
+            - ./env/.env.user_service
+            - ./env/.env.garage.credential
         # Let it sleep, we will set it inside docker container
         command: sleep infinity
         volumes:
@@ -49,12 +53,13 @@ services:
         depends_on:
             - db
             - redis
-    
+            - garage
+
     course-backend:
         image: course_management_service
         container_name: course_management_service
         env_file:
-            - ./env/.env.course_service 
+            - ./env/.env.course_service
         # Let it sleep, we will set it inside docker container
         command: sleep infinity
         volumes:
