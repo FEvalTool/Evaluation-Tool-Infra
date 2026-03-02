@@ -96,7 +96,7 @@ cat > /env/.env.garage.credential << EOF
 GARAGE_ACCESS_KEY_ID=${ACCESS_KEY}
 GARAGE_SECRET_ACCESS_KEY=${SECRET_KEY}
 GARAGE_ENDPOINT_URL=http://garage:3900
-GARAGE_CDN_HOST=public.cdn.eduscrum.local
+GARAGE_CDN_ROOT_DOMAIN=cdn.eduscrum.local
 GARAGE_CDN_PORT=3902
 GARAGE_S3_HOST=s3.eduscrum.local
 GARAGE_S3_PORT=3900
