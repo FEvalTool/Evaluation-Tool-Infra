@@ -32,6 +32,7 @@ services:
             dockerfile: docker/garage/Dockerfile
         ports:
             - 3900:3900
+            - 3902:3902
         volumes:
             - ./env/garage.toml:/etc/garage.toml
             - garage-meta:/var/lib/garage/meta:rw

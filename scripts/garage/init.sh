@@ -54,19 +54,40 @@ garage -c /etc/garage.toml key allow --create-bucket app-key || true
 
 # ─── BUCKET ────────────────────────────────────────────────────────────────────
 echo "Checking bucket..."
+BUCKET_EXISTS=$(garage -c /etc/garage.toml bucket list | grep "public" || true)
+
+if [ -z "$BUCKET_EXISTS" ]; then
+    echo "Creating bucket..."
+    garage -c /etc/garage.toml bucket create public
+else
+    echo "Bucket 'public' already exists, skipping..."
+fi
+
 BUCKET_EXISTS=$(garage -c /etc/garage.toml bucket list | grep "auth" || true)
 
 if [ -z "$BUCKET_EXISTS" ]; then
     echo "Creating bucket..."
     garage -c /etc/garage.toml bucket create auth
 else
-    echo "Bucket already exists, skipping..."
+    echo "Bucket 'auth' already exists, skipping..."
+fi
+
+BUCKET_EXISTS=$(garage -c /etc/garage.toml bucket list | grep "course" || true)
+
+if [ -z "$BUCKET_EXISTS" ]; then
+    echo "Creating bucket..."
+    garage -c /etc/garage.toml bucket create course
+else
+    echo "Bucket 'course' already exists, skipping..."
 fi
 
 # ─── BUCKET PERMISSIONS ────────────────────────────────────────────────────────
 echo "Setting bucket permissions..."
 KEY_ID=$(garage -c /etc/garage.toml key list | grep app-key | awk '{print $1}')
+garage -c /etc/garage.toml bucket allow --read --write --owner public --key $KEY_ID
 garage -c /etc/garage.toml bucket allow --read --write --owner auth --key $KEY_ID
+garage -c /etc/garage.toml bucket allow --read --write --owner course --key $KEY_ID
+garage -c /etc/garage.toml bucket website --allow public
 
 # ─── CREDENTIALS FILE ──────────────────────────────────────────────────────────
 echo "Saving credentials to /env/.env.garage.credential..."
@@ -75,9 +96,14 @@ cat > /env/.env.garage.credential << EOF
 GARAGE_ACCESS_KEY_ID=${ACCESS_KEY}
 GARAGE_SECRET_ACCESS_KEY=${SECRET_KEY}
 GARAGE_ENDPOINT_URL=http://garage:3900
-GARAGE_ENDPOINT_PUBLIC_URL=http://s3.eduscrum.local:3900
+GARAGE_CDN_HOST=public.cdn.eduscrum.local
+GARAGE_CDN_PORT=3902
+GARAGE_S3_HOST=s3.eduscrum.local
+GARAGE_S3_PORT=3900
 GARAGE_REGION=eduscrum
+GARAGE_BUCKET_PUBLIC=public
 GARAGE_BUCKET_AUTH=auth
+GARAGE_BUCKET_COURSE=course
 EOF
 
 echo "Setup complete!"

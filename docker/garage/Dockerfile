@@ -10,7 +10,7 @@ RUN mkdir -p /var/lib/garage/meta /var/lib/garage/data
 COPY scripts/garage/init.sh /init.sh
 RUN chmod +x /init.sh
 
-EXPOSE 3900 3901
+EXPOSE 3900 3901 3902
 
 # Start garage server and run init script
 CMD ["/bin/sh", "-c", "garage -c /etc/garage.toml server & sleep 10 && /init.sh && wait"]
